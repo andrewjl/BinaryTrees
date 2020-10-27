@@ -64,7 +64,6 @@ class Node<A> {
     
     func traverseDepthFirst(strategy: DepthTraversalStrategy,
                             closure: (A) -> ()) {
-        
         switch strategy {
             case .preorder:
                 switch (self.leftChild, self.rightChild) {
@@ -124,6 +123,25 @@ class Node<A> {
                                                       closure: closure)
                         closure(self.head)
                 }
+        }
+    }
+    
+    func traverseBreathFirst(_ closure: (A) -> ()) {
+        let queue = Queue<Node<A>>()
+        queue.enqueue(self)
+        
+        while queue.isEmpty == false  {
+            if let dequeuedNode = queue.dequeue() {
+                closure(dequeuedNode.head)
+                
+                if let lc = dequeuedNode.leftChild {
+                    queue.enqueue(lc)
+                }
+            
+                if let rc = dequeuedNode.rightChild {
+                    queue.enqueue(rc)
+                }
+            }
         }
     }
 }
@@ -261,10 +279,6 @@ let fNode = Node("F",
             rightChild: Node("J",
                             leftChild: Node("G", leftChild: Node("I", leftChildHead: "H")),
                             rightChild: Node("K")))
-                
-let printedNode = printBreadthFirst(node: sampleNode)
-
-print("Print Breadth First: \(printedNode)")
 
 let inorderDepthFirstPrintedNode = printDepthFirst(node: sampleNode, strategy: .inorder)
 print("Inorder: \(inorderDepthFirstPrintedNode)")
@@ -297,3 +311,10 @@ sampleNode.traverseDepthFirst(strategy: .preorder,
 
 print("Preorder (TR) \(preOrderTraversalResult)")
 
+
+let printedNode = printBreadthFirst(node: sampleNode)
+print("Print Breadth First (M): \(printedNode)")
+
+var breathFirstTraversalResult = ""
+sampleNode.traverseBreathFirst({ breathFirstTraversalResult.append(spacer); breathFirstTraversalResult.append($0) })
+print("Print Breadth First (TR): \(breathFirstTraversalResult)")
