@@ -111,8 +111,8 @@ func breadthFirstTraversal<A>(node: Node<A>) -> [A] {
     return result
 }
 
-func traverse<A>(node: Node<A>,
-                 strategy: TraversalStrategy) -> [A] {
+func traversed<A>(node: Node<A>,
+                  strategy: TraversalStrategy) -> [A] {
     var result = [A]()
     
     switch strategy {
@@ -157,11 +157,9 @@ class Node<A> {
         }
     }
     
-    func a_traverse(strategy: TraversalStrategy,
+    func traverse(strategy: TraversalStrategy,
                   closure: (A) -> ()) {
-        let traversed = traverse(node: self, strategy: strategy)
-        
-        traversed.forEach { closure($0) }
+        traversed(node: self, strategy: strategy).forEach { closure($0) }
     }
     
     var count: Int {
@@ -192,7 +190,7 @@ struct TreeIterator<A> {
         self.root = binaryTree
         self.traversalStrategy = traversalStrategy
         self.count = binaryTree.count
-        self.storage = traverse(node: binaryTree, strategy: traversalStrategy).reversed()
+        self.storage = traversed(node: binaryTree, strategy: traversalStrategy).reversed()
     }
 
     mutating func next() -> A? {
