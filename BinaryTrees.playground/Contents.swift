@@ -2,6 +2,13 @@ import Foundation
 
 let spacer = " "
 
+enum TraversalStrategy {
+    case preorderDepthFirst
+    case inorderDepthFirst
+    case postorderDepthFirst
+    case breadthFirst
+}
+
 class Queue<A> {
     var store: [A] = []
     
@@ -34,6 +41,94 @@ extension Queue where A : CustomStringConvertible {
     }
 }
 
+func preorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
+    var result:[A] = [node.head]
+    
+    if let lc = node.leftChild {
+        result.append(contentsOf: preorderDepthFirstTraversal(node: lc))
+    }
+    
+    if let rc = node.rightChild {
+        result.append(contentsOf: preorderDepthFirstTraversal(node: rc))
+    }
+    
+    return result
+}
+
+
+func inorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
+    var result = [A]()
+    
+    if let lc = node.leftChild {
+        result.append(contentsOf: inorderDepthFirstTraversal(node: lc))
+    }
+    
+    result.append(node.head)
+    
+    if let rc = node.rightChild {
+        result.append(contentsOf: inorderDepthFirstTraversal(node: rc))
+    }
+    
+    return result
+}
+
+func postorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
+    var result = [A]()
+    
+    if let lc = node.leftChild {
+        result.append(contentsOf: postorderDepthFirstTraversal(node: lc))
+    }
+    
+    if let rc = node.rightChild {
+        result.append(contentsOf: postorderDepthFirstTraversal(node: rc))
+    }
+    
+    result.append(node.head)
+    
+    return result
+}
+
+func breadthFirstTraversal<A>(node: Node<A>) -> [A] {
+    var result = [A]()
+    
+    let queue = Queue<Node<A>>()
+    queue.enqueue(node)
+    
+    while queue.isEmpty == false  {
+        if let dequeuedNode = queue.dequeue() {
+            result.append(dequeuedNode.head)
+            
+            if let lc = dequeuedNode.leftChild {
+                queue.enqueue(lc)
+            }
+
+            if let rc = dequeuedNode.rightChild {
+                queue.enqueue(rc)
+            }
+        }
+    }
+    
+    return result
+}
+
+func traverse<A>(node: Node<A>,
+                 strategy: TraversalStrategy) -> [A] {
+    var result = [A]()
+    
+    switch strategy {
+        case .preorderDepthFirst:
+            result = preorderDepthFirstTraversal(node: node)
+        case .inorderDepthFirst:
+            result = inorderDepthFirstTraversal(node: node)
+        case .postorderDepthFirst:
+            result = postorderDepthFirstTraversal(node: node)
+        case .breadthFirst:
+            result = breadthFirstTraversal(node: node)
+    }
+    
+    return result
+}
+
 class Node<A> {
     let head: A
     
@@ -62,197 +157,79 @@ class Node<A> {
         }
     }
     
-    func traverseDepthFirst(strategy: DepthTraversalStrategy,
-                            closure: (A) -> ()) {
-        switch strategy {
-            case .preorder:
-                switch (self.leftChild, self.rightChild) {
-                    case (nil, nil):
-                        closure(self.head)
-                    case (let leftChild?, nil):
-                        closure(self.head)
-                        leftChild.traverseDepthFirst(strategy: strategy,
-                                                     closure: closure)
-                    case (nil, let rightChild?):
-                        closure(self.head)
-                        rightChild.traverseDepthFirst(strategy: strategy,
-                                                      closure: closure)
-                    case(let leftChild?, let rightChild?):
-                        closure(self.head)
-                        leftChild.traverseDepthFirst(strategy: strategy,
-                                                     closure: closure)
-                        rightChild.traverseDepthFirst(strategy: strategy,
-                                                      closure: closure)
-                }
-            case .inorder:
-                switch (self.leftChild, self.rightChild) {
-                    case (nil, nil):
-                        closure(self.head)
-                    case (let leftChild?, nil):
-                        leftChild.traverseDepthFirst(strategy: strategy,
-                                                     closure: closure)
-                        closure(self.head)
-                    case (nil, let rightChild?):
-                        closure(self.head)
-                        rightChild.traverseDepthFirst(strategy: strategy,
-                                                      closure: closure)
-                    case(let leftChild?, let rightChild?):
-                        leftChild.traverseDepthFirst(strategy: strategy,
-                                                     closure: closure)
-                        closure(self.head)
-                        rightChild.traverseDepthFirst(strategy: strategy,
-                                                      closure: closure)
-                }
-            case .postorder:
-                switch (self.leftChild, self.rightChild) {
-                    case (nil, nil):
-                        closure(self.head)
-                    case (let leftChild?, nil):
-                        leftChild.traverseDepthFirst(strategy: strategy,
-                                                     closure: closure)
-                        closure(self.head)
-                    case (nil, let rightChild?):
-                        rightChild.traverseDepthFirst(strategy: strategy,
-                                                      closure: closure)
-                        closure(self.head)
-                        
-                    case(let leftChild?, let rightChild?):
-                        leftChild.traverseDepthFirst(strategy: strategy,
-                                                     closure: closure)
-                        rightChild.traverseDepthFirst(strategy: strategy,
-                                                      closure: closure)
-                        closure(self.head)
-                }
-        }
+    func a_traverse(strategy: TraversalStrategy,
+                  closure: (A) -> ()) {
+        let traversed = traverse(node: self, strategy: strategy)
+        
+        traversed.forEach { closure($0) }
     }
     
-    func traverseBreathFirst(_ closure: (A) -> ()) {
-        let queue = Queue<Node<A>>()
-        queue.enqueue(self)
+    var count: Int {
+        var result = 0
         
-        while queue.isEmpty == false  {
-            if let dequeuedNode = queue.dequeue() {
-                closure(dequeuedNode.head)
-                
-                if let lc = dequeuedNode.leftChild {
-                    queue.enqueue(lc)
-                }
-            
-                if let rc = dequeuedNode.rightChild {
-                    queue.enqueue(rc)
-                }
-            }
-        }
-    }
-}
-
-extension Node where A : CustomStringConvertible {
-    var printedChildren: String {
-        var result = ""
-    
-        if let unwrappedLeftChild = self.leftChild {
-            result = result + spacer + unwrappedLeftChild.head.description
+        if let lc = self.leftChild {
+            result += lc.count
         }
         
-        if let unwrappedRightChild = self.rightChild {
-            result = result + spacer + unwrappedRightChild.head.description
+        if let rc = self.rightChild {
+            result += rc.count
         }
         
-        if let leftPrintedChildren = self.leftChild?.printedChildren {
-            result = result + leftPrintedChildren
-        }
-        
-        if let rightPrintedChildren = self.rightChild?.printedChildren {
-            result = result + rightPrintedChildren
-        }
+        result += 1
         
         return result
     }
-    
-    var description: String {
-        return self.head.description
-    }
 }
 
-func printBreadthFirst(node: Node<String>) -> String {
-    var result = ""
-    
-    let queue = Queue<Node<String>>()
-    
-    queue.enqueue(node)
-    
-    while queue.isEmpty == false  {
-        if let dequeuedNode = queue.dequeue() {
-            result = result + spacer + dequeuedNode.head
+struct TreeIterator<A> {
+    let root: Node<A>
+    let traversalStrategy: TraversalStrategy
+    var count: Int
+    var storage: [A]
+
+    init(binaryTree: Node<A>,
+         traversalStrategy: TraversalStrategy) {
+        self.root = binaryTree
+        self.traversalStrategy = traversalStrategy
+        self.count = binaryTree.count
+        self.storage = traverse(node: binaryTree, strategy: traversalStrategy).reversed()
+    }
+
+    mutating func next() -> A? {
+        defer {
+            self.count = self.count - 1
+        }
         
-            if let leftChild = dequeuedNode.leftChild {
-                queue.enqueue(leftChild)
-            }
-        
-            if let rightChild = dequeuedNode.rightChild {
-                queue.enqueue(rightChild)
-            }
+        if count == 0 {
+            return nil
+        } else {
+            return self.storage[self.count-1]
         }
     }
-
-    return String(result.dropFirst())
 }
 
-enum DepthTraversalStrategy {
-    case preorder
-    case inorder
-    case postorder
-}
 
-func printDepthFirst(node: Node<String>, strategy:DepthTraversalStrategy = .preorder) -> String {
-    var result = ""
-
-    if strategy == .preorder {
-        switch (node.leftChild, node.rightChild) {
-            case (nil, nil):
-                result = node.head
-            case (let leftChild?, nil):
-                result = node.head + spacer + printDepthFirst(node: leftChild, strategy: strategy)
-            case (nil, let rightChild?):
-                result = node.head + spacer + printDepthFirst(node: rightChild, strategy: strategy)
-            case(let leftChild?, let rightChild?):
-                result = node.head + spacer + printDepthFirst(node: leftChild, strategy: strategy) + spacer + printDepthFirst(node: rightChild, strategy: strategy)
-        }
-    } else if strategy == .inorder {
-        switch (node.leftChild, node.rightChild) {
-            case (nil, nil):
-                result = node.head
-            case (let leftChild?, nil):
-                result = printDepthFirst(node: leftChild, strategy: strategy) + spacer + node.head
-            case (nil, let rightChild?):
-                result = node.head + spacer + printDepthFirst(node: rightChild, strategy: strategy)
-            case(let leftChild?, let rightChild?):
-                result = printDepthFirst(node: leftChild, strategy: strategy) + spacer + node.head + spacer + printDepthFirst(node: rightChild, strategy: strategy)
-        }
-    } else if strategy == .postorder {
-        switch (node.leftChild, node.rightChild) {
-            case (nil, nil):
-                result = node.head
-            case (let leftChild?, nil):
-                result = printDepthFirst(node: leftChild, strategy: strategy) + spacer + node.head
-            case (nil, let rightChild?):
-                result = printDepthFirst(node: rightChild, strategy: strategy) + spacer + node.head
-            case(let leftChild?, let rightChild?):
-                result = printDepthFirst(node: leftChild, strategy: strategy) + spacer + printDepthFirst(node: rightChild, strategy: strategy) + spacer + node.head
-        }
+extension Node: Equatable where A: Equatable {
+    static func == (lhs: Node<A>, rhs: Node<A>) -> Bool {
+        return lhs.head == rhs.head
     }
     
-    return result
+    func parent(of node:Node<A>) -> Node<A>? {
+        if self.rightChild == node || self.leftChild == node {
+            return self
+        }
+        
+        if let lc = self.leftChild?.parent(of: node) {
+            return lc
+        }
+        
+        if let rc = self.rightChild?.parent(of: node) {
+            return rc
+        }
+        
+        return nil
+    }
 }
-
-/*
-                    a
-           b                        c
-     d            e            f        g
-  h     i      j     k      l     m  n     o
-p   q r   s  t   u v   w  x   y  z
-
-*/
 
 let cNode = Node("c",
                 leftChild: Node("f",
@@ -277,44 +254,18 @@ let fNode = Node("F",
                                             rightChildHead: "C"),
                             rightChild: Node("E")),
             rightChild: Node("J",
-                            leftChild: Node("G", leftChild: Node("I", leftChildHead: "H")),
+                            leftChild: Node("I", leftChild: Node("H", leftChildHead: "G")),
                             rightChild: Node("K")))
 
-let inorderDepthFirstPrintedNode = printDepthFirst(node: sampleNode, strategy: .inorder)
-print("Inorder: \(inorderDepthFirstPrintedNode)")
+let t = inorderDepthFirstTraversal(node: fNode)
 
-let postorderDepthFirstPrintedNode = printDepthFirst(node: sampleNode, strategy: .postorder)
-print("Postorder: \(postorderDepthFirstPrintedNode)")
-
-print("Inorder (M): \(printDepthFirst(node: fNode, strategy: .inorder))")
-
-var inorderTravesalResult = ""
-fNode.traverseDepthFirst(strategy: .inorder,
-                              closure: { inorderTravesalResult.append(spacer); inorderTravesalResult.append($0) })
-print("Inorder (TR) \(inorderTravesalResult)")
-
-print("Postorder (M): \(printDepthFirst(node: fNode, strategy: .postorder))")
-
-var postOrderTraversalResult = ""
-fNode.traverseDepthFirst(strategy: .postorder,
-                         closure: { postOrderTraversalResult.append(spacer); postOrderTraversalResult.append($0)})
-
-print("Postorder (TR) \(postOrderTraversalResult)")
-
-let preorderDepthFirstPrintedNode = printDepthFirst(node: sampleNode, strategy: .preorder)
-print("Preorder (M): \(preorderDepthFirstPrintedNode)")
-
-var preOrderTraversalResult = ""
-
-sampleNode.traverseDepthFirst(strategy: .preorder,
-                              closure: { preOrderTraversalResult.append(spacer); preOrderTraversalResult.append($0) })
-
-print("Preorder (TR) \(preOrderTraversalResult)")
+var i = TreeIterator(binaryTree: fNode, traversalStrategy: .inorderDepthFirst)
+let i1 = i.next()
+let i2 = i.next()
+let i3 = i.next()
+let i4 = i.next()
+let i5 = i.next()
 
 
-let printedNode = printBreadthFirst(node: sampleNode)
-print("Print Breadth First (M): \(printedNode)")
 
-var breathFirstTraversalResult = ""
-sampleNode.traverseBreathFirst({ breathFirstTraversalResult.append(spacer); breathFirstTraversalResult.append($0) })
-print("Print Breadth First (TR): \(breathFirstTraversalResult)")
+
