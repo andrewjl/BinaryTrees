@@ -113,20 +113,18 @@ func breadthFirstTraversal<A>(node: Node<A>) -> [A] {
 
 func traversed<A>(node: Node<A>,
                   strategy: TraversalStrategy) -> [A] {
-    var result = [A]()
     
     switch strategy {
         case .preorderDepthFirst:
-            result = preorderDepthFirstTraversal(node: node)
+            return preorderDepthFirstTraversal(node: node)
         case .inorderDepthFirst:
-            result = inorderDepthFirstTraversal(node: node)
+            return inorderDepthFirstTraversal(node: node)
         case .postorderDepthFirst:
-            result = postorderDepthFirstTraversal(node: node)
+            return postorderDepthFirstTraversal(node: node)
         case .breadthFirst:
-            result = breadthFirstTraversal(node: node)
+            return breadthFirstTraversal(node: node)
     }
     
-    return result
 }
 
 class Node<A> {
