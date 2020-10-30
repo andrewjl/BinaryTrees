@@ -206,28 +206,23 @@ struct TreeIterator<A> {
     }
 }
 
-
-extension Node: Equatable where A: Equatable {
-    static func == (lhs: Node<A>, rhs: Node<A>) -> Bool {
-        return lhs.head == rhs.head
-    }
-    
-    func parent(of node:Node<A>) -> Node<A>? {
-        if self.rightChild == node || self.leftChild == node {
-            return self
-        }
-        
-        if let lc = self.leftChild?.parent(of: node) {
-            return lc
-        }
-        
-        if let rc = self.rightChild?.parent(of: node) {
-            return rc
-        }
-        
-        return nil
-    }
+// Simplified accumulation function that wraps Array reduce.
+// No type conversion support yet
+// TBD: Error handling, folding into iterator that can handle more dynamism
+func treeReduce<A>(node: Node<A>,
+                   strategy: TraversalStrategy = .preorderDepthFirst,
+                   initialResult: A,
+                   updateAccumulatingResult: (A, A) -> (A)) -> A {
+    return traversed(node: node,
+                     strategy: strategy).reduce(initialResult, updateAccumulatingResult)
 }
+
+let simpleNode = Node(4,
+                      leftChildHead: 3,
+                      rightChildHead: 8)
+
+let sum = treeReduce(node: simpleNode,
+                     initialResult: 0) { $0 + $1 }
 
 let cNode = Node("c",
                 leftChild: Node("f",
@@ -255,14 +250,8 @@ let fNode = Node("F",
                             leftChild: Node("I", leftChild: Node("H", leftChildHead: "G")),
                             rightChild: Node("K")))
 
-let t = inorderDepthFirstTraversal(node: fNode)
 
-var i = TreeIterator(binaryTree: fNode, traversalStrategy: .inorderDepthFirst)
-let i1 = i.next()
-let i2 = i.next()
-let i3 = i.next()
-let i4 = i.next()
-let i5 = i.next()
+
 
 
 
