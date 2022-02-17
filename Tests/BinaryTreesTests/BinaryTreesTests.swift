@@ -63,7 +63,33 @@ final class BinaryTreesTests: XCTestCase {
         )
 
         XCTAssertEqual(tree.map(\Int.description), descriptiveTree)
+    }
 
-        print(descriptiveTree)
+    func testSearch() throws {
+        let tree = Tree(
+            7,
+            leftChild: Tree(3),
+            rightChild: Tree(
+                9,
+                leftChildHead: 8,
+                rightChildHead: 10
+            )
+        )
+
+        XCTAssertEqual(
+            tree.search(for: 3),
+            Tree(3)
+        )
+
+        XCTAssertEqual(
+            tree.search(
+                for: 9
+            ),
+            Tree(
+                9,
+                leftChildHead: 8,
+                rightChildHead: 10
+            )
+        )
     }
 }

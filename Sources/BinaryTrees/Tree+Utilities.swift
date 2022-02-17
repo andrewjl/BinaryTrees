@@ -13,6 +13,20 @@ extension Tree: Equatable where Element: Equatable {
         lhs.leftChild == rhs.leftChild &&
         rhs.rightChild == rhs.rightChild
     }
+
+    func search(for element: Element) -> Tree? {
+        if head == element { return self }
+
+        if let left = leftChild?.search(for: element) {
+            return left
+        }
+
+        if let right = rightChild?.search(for: element) {
+            return right
+        }
+
+        return nil
+    }
 }
 
 extension Tree: CustomStringConvertible where Element: CustomStringConvertible {
