@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum TraversalStrategy {
+public enum TraversalStrategy {
     case preorderDepthFirst
     case inorderDepthFirst
     case postorderDepthFirst
@@ -15,16 +15,16 @@ enum TraversalStrategy {
 }
 
 extension TraversalStrategy: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         switch self {
         case .preorderDepthFirst:
-            return "Preorder DFS"
+            return "Preorder Depth First"
         case .inorderDepthFirst:
-            return "Inorder DFS"
+            return "Inorder Depth First"
         case .postorderDepthFirst:
-            return "Postorder DFS"
+            return "Postorder Depth First"
         case .breadthFirst:
-            return "BFS"
+            return "Breadth First"
         }
     }
 }

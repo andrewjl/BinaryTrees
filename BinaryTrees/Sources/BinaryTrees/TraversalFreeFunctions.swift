@@ -4,9 +4,7 @@
 
 import Foundation
 
-let spacer = " "
-
-func preorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
+public func preorderDepthFirstTraversal<A>(node: Tree<A>) -> [A] {
     var result:[A] = [node.head]
 
     if let lc = node.leftChild {
@@ -21,7 +19,7 @@ func preorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
 }
 
 
-func inorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
+public func inorderDepthFirstTraversal<A>(node: Tree<A>) -> [A] {
     var result = [A]()
 
     if let lc = node.leftChild {
@@ -37,7 +35,7 @@ func inorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
     return result
 }
 
-func postorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
+public func postorderDepthFirstTraversal<A>(node: Tree<A>) -> [A] {
     var result = [A]()
 
     if let lc = node.leftChild {
@@ -53,10 +51,10 @@ func postorderDepthFirstTraversal<A>(node: Node<A>) -> [A] {
     return result
 }
 
-func breadthFirstTraversal<A>(node: Node<A>) -> [A] {
+public func breadthFirstTraversal<A>(node: Tree<A>) -> [A] {
     var result = [A]()
 
-    let queue = Queue<Node<A>>()
+    let queue = Queue<Tree<A>>()
     queue.enqueue(node)
 
     while queue.isEmpty == false  {
@@ -76,7 +74,7 @@ func breadthFirstTraversal<A>(node: Node<A>) -> [A] {
     return result
 }
 
-func traversed<A>(node: Node<A>,
+func traversed<A>(node: Tree<A>,
                   strategy: TraversalStrategy) -> [A] {
 
     switch strategy {
